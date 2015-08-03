@@ -131,10 +131,13 @@ class Course:
             list.append(i)
         for i in list:
             # TODO
-            start_date = i.find()
-            href = i.find('a')['href']
+            tds = i.find_all('td')
+            url = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/' + i.find('a')['href']
+            id = re.search(r'(\d+)', url).group(0)
             title = i.find('a').contents[0]
-            yield Work(title=title)
+            start_time = tds[1].contents[0]
+            end_time = tds[2].contents[0]
+            yield Work(id=id, title=title, url=url, start_time=start_time, end_time=end_time)
 
     @property
     def messages(self):
@@ -152,14 +155,15 @@ class Work:
     the homework class
     """
 
-    def __init__(self, url=None, id=None, title=None, start_time=None,end_time=None):
+    def __init__(self, url=None, id=None, title=None, start_time=None, end_time=None):
         self._url = url
         self._id = id
         self._title = title
         self._details = None
         self._file = None
-        self._start_time = None
-        self._end_time = None
+        self._start_time = start_time
+        self._end_time = end_time
+        pass
 
     def show(self):
         output.write(u'work-title:' + self._title + u'\n')
@@ -194,8 +198,6 @@ class Work:
 
 
 init()
-
-
 
 
 def main():

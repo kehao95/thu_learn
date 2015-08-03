@@ -14,7 +14,8 @@ def main():
     for course in semester.courses:
         print(course.name, course.id, course.url)
         for work in course.works:
-            print(work.title)
+            # print(work.url)
+            print(work.title,work.id,work.start_time,work.end_time)
 
 
 

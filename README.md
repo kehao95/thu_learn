@@ -25,6 +25,10 @@ semester = Semester(current=False) //之前所有学期
 	- id
 	- works
 - Work
+    - id
+    - url
 	- title
+    - start_time
+    - end_time
 
 
