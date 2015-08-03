@@ -7,7 +7,7 @@
 - 输入帐号&密码
 - 实例化一个学期
 semester = Semester() //当前学期
-semester = Semester(current=False) //之前所有学期 
+semester = Semester(current=False) //之前所有学期
 ```
 
 
@@ -27,8 +27,11 @@ semester = Semester(current=False) //之前所有学期
 - Work
     - id
     - url
-	- title
+		- title
     - start_time
     - end_time
-
-
+		- file
+- File
+		- name
+		- note
+		- url

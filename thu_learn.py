@@ -42,6 +42,13 @@ def init():
     _session.post(_URL_LOGIN, data)
 
 
+def make_soup(url):
+    r = _session.get(url)
+    r.encoding = 'bgk'
+    soup = BeautifulSoup(r.content, "html.parser")
+    return soup
+
+
 class Semester:
     """
     this is the Semester class
@@ -53,9 +60,7 @@ class Semester:
             self.url = _URL_CURRENT_SEMESTER
         else:
             self.url = _URL_PAST_SEMESTER
-        self.r = _session.get(self.url)
-        self.r.encoding = 'bgk'
-        self.soup = BeautifulSoup(self.r.content, "html.parser")
+        self.soup = make_soup(self.url)
         pass
 
     @property
@@ -121,9 +126,7 @@ class Course:
     @property
     def works(self):
         url = _PREF_WORK + self._id
-        self.r = _session.get(url)
-        self.r.encoding = 'bgk'
-        soup = BeautifulSoup(self.r.content, "html.parser")
+        soup = make_soup(url)
         list = []
         for i in soup.find_all('tr', class_='tr1'):
             list.append(i)
@@ -163,6 +166,7 @@ class Work:
         self._file = None
         self._start_time = start_time
         self._end_time = end_time
+        self.soup = make_soup(self.url)
         pass
 
     def show(self):
@@ -181,20 +185,53 @@ class Work:
         return self._title
 
     @property
-    def details(self):
-        return self._details
-
-    @property
-    def file(self):
-        return self._file
-
-    @property
     def start_time(self):
         return self._start_time
 
     @property
     def end_time(self):
         return self._end_time
+
+    @property
+    def details(self):
+        if self._details is None:
+            try:
+                self._details = self.soup.find_all('td', class_='tr_2')[1].textarea.contents[0]
+            except:
+                pass
+        return self._details
+
+    @property
+    def file(self):
+        if self._file is None:
+            try:
+                fname = self.soup.find_all('td', class_='tr_2')[2].a.contents[0]
+                furl = 'http://learn.tsinghua.edu.cn' + self.soup.find_all('td', class_='tr_2')[2].a['href']
+                self._file = File(url=furl, name=fname)
+            except:
+                pass
+        return self._file
+
+
+class File:
+    def __init__(self, url, name=None, note=None):
+        self._name = name
+        self._url = url
+        self._note = note
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def note(self):
+        return self._note
+
+
 
 
 init()

@@ -6,7 +6,7 @@ from thu_learn import Work
 
 
 def main():
-    print('Crawler v0.1')
+    print('Crawler v0.2')
     try:
         semester = Semester(current=False)
     except ValueError:
@@ -15,8 +15,9 @@ def main():
         print(course.name, course.id, course.url)
         for work in course.works:
             # print(work.url)
-            print(work.title,work.id,work.start_time,work.end_time)
-
+            print(work.title, work.id, work.start_time, work.end_time)
+            if work.file is not None:
+                print(work.file.name, work.file.url)
 
 
 if __name__ == '__main__':
