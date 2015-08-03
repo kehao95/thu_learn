@@ -19,19 +19,19 @@ semester = Semester(current=False) //之前所有学期
 请参照Wiki[网络学堂基本元素结构](https://github.com/kehao95/THULearn/wiki/%E7%BD%91%E7%BB%9C%E5%AD%A6%E5%A0%82%E5%9F%BA%E6%9C%AC%E5%85%83%E7%B4%A0%E7%BB%93%E6%9E%84)
 
 - Semester
-	- courses
+    - courses
 - Course
-	- name
-	- id
-	- works
+    - name
+    - id
+    - works
 - Work
     - id
     - url
-		- title
+    - title
     - start_time
     - end_time
-		- file
+    - file
 - File
-		- name
-		- note
-		- url
+    - name
+    - note
+    - url
