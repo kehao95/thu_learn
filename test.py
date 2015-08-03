@@ -3,6 +3,7 @@ from thu_learn import *
 from thu_learn import Semester
 from thu_learn import Course
 from thu_learn import Work
+import webbrowser
 
 
 def main():
@@ -18,7 +19,7 @@ def main():
             print(work.title, work.id, work.start_time, work.end_time)
             if work.file is not None:
                 print(work.file.name, work.file.url)
-
+                work.file.save(root=('file/'+course.name))
 
 if __name__ == '__main__':
     main()

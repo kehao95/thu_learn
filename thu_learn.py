@@ -4,6 +4,9 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import os
+
+
 
 # global vars
 output = open("TEST.txt", "w", encoding='utf-8')
@@ -219,6 +222,13 @@ class File:
         self._url = url
         self._note = note
 
+    def save(self, root='.'):
+        if not os.path.exists(root):
+            os.makedirs(root)
+        r = requests.get(self.url)
+        with open(root + '/' + self.name, 'wb') as f:
+            f.write(r.content)
+
     @property
     def name(self):
         return self._name
@@ -230,8 +240,6 @@ class File:
     @property
     def note(self):
         return self._note
-
-
 
 
 init()
