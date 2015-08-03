@@ -24,4 +24,5 @@ import thu_learn
     }
 ```
 
-欢迎编辑[wiki](https://github.com/kehao95/THULearn/wiki)和fork+PR
+欢迎编辑WIKI [https://github.com/kehao95/THULearn/wiki](https://github.com/kehao95/THULearn/wiki)
+欢迎fork+PR
