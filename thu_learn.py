@@ -89,12 +89,6 @@ class Semester:
             id = url[-6:]
             yield Course(name=name, url=url, id=id)
 
-    def save(self):
-        with open('result.html', 'w', encoding="gbk") as f:
-            f.write(self.r.text)
-
-    def print(self):
-        print(self.r)
 
 
 class Course:
@@ -107,12 +101,7 @@ class Course:
         self._url = url
         self._name = name
         self.r = None
-        self.show()
 
-    def show(self):
-        output.write(u'url:' + self._url + u'\n')
-        output.write(u'name:' + self._name + u'\n')
-        output.write(u'id:' + self._id + u'\n')
 
     @property
     def url(self):
