@@ -8,6 +8,7 @@ import webbrowser
 
 def main():
     print('Crawler v0.2')
+    login()
     try:
         semester = Semester(current=False)
     except ValueError:

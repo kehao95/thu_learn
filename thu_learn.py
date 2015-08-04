@@ -3,16 +3,12 @@ __author__ = 'kehao'
 import requests
 from bs4 import BeautifulSoup
 import re
-import json
 import os
 
 
 
 # global vars
-output = open("TEST.txt", "w", encoding='utf-8')
 _session = requests.session()
-_userid = input('userid:')
-_userpass = input('userpass:')
 _URL_BASE = 'https://learn.tsinghua.edu.cn'
 _URL_LOGIN = _URL_BASE + '/MultiLanguage/lesson/teacher/loginteacher.jsp'
 
@@ -33,19 +29,29 @@ _PREF_LIST = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/ware_lis
 _PREF_WORK = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id='
 
 
-def init():
+def login(user_id=None, user_pass=None):
     """
-    init options login to get cookies
-    :return:
+    login to get cookies in _session
+    :param user_id: your Tsinghua id "keh13" for example
+    :param user_pass: your password
+    :return:None
     """
+    if user_id is None or user_pass is None:
+        user_id = input("TsinghuaId:")
+        user_pass = input("Password:")
     data = dict(
-        userid=_userid,
-        userpass=_userpass,
+        userid=user_id,
+        userpass=user_pass,
     )
     _session.post(_URL_LOGIN, data)
 
 
 def make_soup(url):
+    """
+    _session.GET the page, handle the encoding and return the BeautifulSoup
+    :param url: Page url
+    :return: BeautifulSoup
+    """
     r = _session.get(url)
     r.encoding = 'bgk'
     soup = BeautifulSoup(r.content, "html.parser")
@@ -54,11 +60,16 @@ def make_soup(url):
 
 class Semester:
     """
-    this is the Semester class
-    using the url as id
+    Class Semester have all courses in it
     """
-
     def __init__(self, current=True):
+        """
+        set the current flag to get current/past Semester
+        :param current: Boolean True/False for Current/Past semester
+        :return: None
+        """
+        if _session is None:
+            raise RuntimeError("Call login(userid, userpass) before anything else")
         if current:
             self.url = _URL_CURRENT_SEMESTER
         else:
@@ -69,9 +80,10 @@ class Semester:
     @property
     def courses(self):
         """
-        get all courses in the home
-        :return: Course obj        self.name = name
+        return all the courses under the semester
+        :return: Courses generator
         """
+
         list = []
         for i in self.soup.find_all('tr', class_='info_tr2'):
             list.append(i.find('a'))
@@ -90,7 +102,6 @@ class Semester:
             yield Course(name=name, url=url, id=id)
 
 
-
 class Course:
     """
     this is the Course class
@@ -102,21 +113,27 @@ class Course:
         self._name = name
         self.r = None
 
-
     @property
     def url(self):
+        """course url"""
         return self._url
 
     @property
     def name(self):
+        """course name"""
         return self._name
 
     @property
     def id(self):
+        """courses id"""
         return self._id
 
     @property
     def works(self):
+        """
+        get all the work in course
+        :return: Work generator
+        """
         url = _PREF_WORK + self._id
         soup = make_soup(url)
         list = []
@@ -136,11 +153,19 @@ class Course:
 
     @property
     def messages(self):
+        """
+        get all messages in course
+        :return: Message generator
+        """
         pass
         # TODO
 
     @property
     def files(self):
+        """
+        get all files in course
+        :return: File generator
+        """
         pass
         # TODO
 
@@ -161,31 +186,43 @@ class Work:
         self.soup = make_soup(self.url)
         pass
 
-    def show(self):
-        output.write(u'work-title:' + self._title + u'\n')
-
     @property
     def url(self):
+        """work url"""
         return self._url
 
     @property
     def id(self):
+        """work id"""
         return self._id
 
     @property
     def title(self):
+        """work title"""
         return self._title
 
     @property
     def start_time(self):
+        """
+        start date of the work
+        :return:str time 'yyyy-mm-dd'
+        """
         return self._start_time
 
     @property
     def end_time(self):
+        """
+        end date of the work
+        :return: str time 'yyyy-mm-dd'
+        """
         return self._end_time
 
     @property
     def details(self):
+        """
+        the description of the work
+        :return:str details /None if not exists
+        """
         if self._details is None:
             try:
                 self._details = self.soup.find_all('td', class_='tr_2')[1].textarea.contents[0]
@@ -195,6 +232,10 @@ class Work:
 
     @property
     def file(self):
+        """
+        the file attached to the work
+        :return: Instance of File/None if not exists
+        """
         if self._file is None:
             try:
                 fname = self.soup.find_all('td', class_='tr_2')[2].a.contents[0]
@@ -220,18 +261,23 @@ class File:
 
     @property
     def name(self):
+        """file name
+        Note! the file name is the name on the web but not the name in the download link
+        """
         return self._name
 
     @property
     def url(self):
+        """download url"""
         return self._url
 
     @property
     def note(self):
+        """the description of the file
+        this will exits under the CourseFile area but not in work area
+        # considering take course.details as note
+        """
         return self._note
-
-
-init()
 
 
 def main():
