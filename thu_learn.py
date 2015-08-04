@@ -1,4 +1,4 @@
-# -*- coding: GBK -*-
+# -*- coding: utf-8 -*-
 __author__ = 'kehao'
 import requests
 from bs4 import BeautifulSoup
@@ -16,20 +16,20 @@ _userpass = input('userpass:')
 _URL_BASE = 'https://learn.tsinghua.edu.cn'
 _URL_LOGIN = _URL_BASE + '/MultiLanguage/lesson/teacher/loginteacher.jsp'
 
-# Á½Á´½ÓÊÇ²»Í¬µÄÑ§ÆÚ
+# 学期
 _URL_CURRENT_SEMESTER = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?typepage=1'
 _URL_PAST_SEMESTER = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?typepage=2'
 
-# ¾É°æÍøÂçÑ§ÌÃ¸÷°å¿éprefex
-# ¹«¸æ
+# 课程不同板块前缀
+# 课程公告
 _PREF_NTF = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id='
-# ÐÅÏ¢
+# 课程信息
 _PREF_INFO = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/course_info.jsp?course_id='
-# ¿Î³ÌÎÄ¼þ
+# 课程文件
 _PREF_DOWN = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/download.jsp?course_id='
-# ½ÌÑ§×ÊÔ´
+# 教学资源
 _PREF_LIST = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/ware_list.jsp?course_id='
-# ¿Î³Ì×÷Òµ
+# 课程作业
 _PREF_WORK = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id='
 
 
