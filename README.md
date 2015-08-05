@@ -4,10 +4,22 @@
 ## 简单使用
 ```
 - import thu_learn
-- 输入帐号&密码
-- 实例化一个学期
+- 使用login函数（根据返回值可以判断是否登录成功True/False）
+- 初始实例化一个学期对象
 semester = Semester() //当前学期
 semester = Semester(current=False) //之前所有学期
+- 直接点号访问对象的子元素，相同当子元素数量大于一时返回为iterable
+for course in semester.courses:
+    course.name
+    course.url
+    course.id
+    for work in course.works:
+        work.title
+        work.url
+        ....
+    for file in course.files:
+        file.save(path)
+        ...
 ```
 
 
@@ -24,6 +36,7 @@ semester = Semester(current=False) //之前所有学期
     - name
     - id
     - works
+    - files
 - Work
     - id
     - url
