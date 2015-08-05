@@ -34,7 +34,7 @@ def login(user_id=None, user_pass=None):
     login to get cookies in _session
     :param user_id: your Tsinghua id "keh13" for example
     :param user_pass: your password
-    :return:None
+    :return:True if succeed
     """
     if user_id is None or user_pass is None:
         user_id = input("TsinghuaId:")
@@ -43,7 +43,13 @@ def login(user_id=None, user_pass=None):
         userid=user_id,
         userpass=user_pass,
     )
-    _session.post(_URL_LOGIN, data)
+    r = _session.post(_URL_LOGIN, data)
+    # 即使登录失败也是200所以根据返回内容简单区分了
+    if len(r.content)>120:
+        return False
+    else:
+        return True
+
 
 
 def make_soup(url):
