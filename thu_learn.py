@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __author__ = 'kehao'
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 import re
 import os
 
@@ -18,11 +18,11 @@ _URL_PAST_SEMESTER = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/
 
 # 课程不同板块前缀
 # 课程公告
-_PREF_NTF = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id='
+_PREF_MSG = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id='
 # 课程信息
 _PREF_INFO = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/course_info.jsp?course_id='
 # 课程文件
-_PREF_DOWN = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/download.jsp?course_id='
+_PREF_FILES = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/download.jsp?course_id='
 # 教学资源
 _PREF_LIST = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/ware_list.jsp?course_id='
 # 课程作业
@@ -62,6 +62,7 @@ class Semester:
     """
     Class Semester have all courses in it
     """
+
     def __init__(self, current=True):
         """
         set the current flag to get current/past Semester
@@ -157,7 +158,8 @@ class Course:
         get all messages in course
         :return: Message generator
         """
-        pass
+        url = _PREF_MSG + self.id
+        soup = make_soup(url)
         # TODO
 
     @property
@@ -166,8 +168,20 @@ class Course:
         get all files in course
         :return: File generator
         """
+        url = _PREF_FILES + self.id
+        soup = make_soup(url)
+        list = []
+        for i in soup.find_all('tr', class_='tr1'):
+            list.append(i)
+        for i in soup.find_all('tr', class_='tr2'):
+            list.append(i)
+        for j in list:
+            name = re.search(r'getfilelink=([^&]+)&', str(j.find(text=lambda text: isinstance(text, Comment)))).group(1)
+            a = j.find('a')
+            url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
+            title = re.sub(r'[\n\r\t ]', '', a.contents[0])
+            yield File(name=name, url=url)
         pass
-        # TODO
 
 
 class Work:
@@ -247,17 +261,21 @@ class Work:
 
 
 class File:
-    def __init__(self, url, name=None, note=None):
+    def __init__(self, url, name, note=None):
         self._name = name
         self._url = url
         self._note = note
 
     def save(self, root='.'):
-        if not os.path.exists(root):
-            os.makedirs(root)
-        r = requests.get(self.url)
-        with open(root + '/' + self.name, 'wb') as f:
-            f.write(r.content)
+        print(self.name)
+
+        r = requests.get(self.url, stream=True)
+        with open(root + '/' + self.name, 'wb') as handle:
+            if not r.ok:
+                raise ValueError('failed in saving file', self.name, self.url)
+            for block in r.iter_content(1024):
+                handle.write(block)
+        print('done',self.name)
 
     @property
     def name(self):
@@ -278,6 +296,10 @@ class File:
         # considering take course.details as note
         """
         return self._note
+
+
+class Message:
+    pass
 
 
 def main():
