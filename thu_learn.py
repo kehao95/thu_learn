@@ -51,7 +51,6 @@ def login(user_id=None, user_pass=None):
         return True
 
 
-
 def make_soup(url):
     """
     _session.GET the page, handle the encoding and return the BeautifulSoup
@@ -317,7 +316,9 @@ class Message:
     def details(self):
         if self._details is None:
             soup = make_soup(self.url)
-            self._details = soup.find_all('td',class_='tr_l2')[1].text.replace('\xa0', ' ')
+            self._details = soup.find_all('td', class_='tr_l2')[1].text.replace('\xa0', ' ')
+            self._details = re.sub('(\\xa0)+', ' ', self._details)
+            self._details = re.sub('\n+', '\n', self._details)
         return self._details
 
 
