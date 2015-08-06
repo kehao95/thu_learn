@@ -6,7 +6,7 @@ import time
 
 def test_semester():
     print('')
-    semester = Semester(current=False)
+    semester = Semester(current=True)
     return semester.courses
 
 

@@ -156,9 +156,10 @@ class Course:
         soup = make_soup(url)
         for m in soup.find_all('tr', class_=['tr1', 'tr2']):
             tds = m.find_all('td')
-            title = tds[1].contents[1].contents[0]
+            title = tds[1].contents[1].text
+            print(title)
             url = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/' + tds[1].contents[1]['href']
-            date = tds[3].contents[0]
+            date = tds[3].text
             yield Message(title=title, url=url, date=date)
             # TODO
 
