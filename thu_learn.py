@@ -45,11 +45,10 @@ def login(user_id=None, user_pass=None):
     )
     r = _session.post(_URL_LOGIN, data)
     # 即使登录失败也是200所以根据返回内容简单区分了
-    if len(r.content)>120:
+    if len(r.content) > 120:
         return False
     else:
         return True
-
 
 
 def make_soup(url):
@@ -90,13 +89,8 @@ class Semester:
         return all the courses under the semester
         :return: Courses generator
         """
-
-        list = []
-        for i in self.soup.find_all('tr', class_='info_tr2'):
-            list.append(i.find('a'))
-        for i in self.soup.find_all('tr', class_='info_tr'):
-            list.append(i.find('a'))
-        for i in list:
+        for j in self.soup.find_all('tr', class_=['info_tr', 'info_tr2']):
+            i = j.find('a')
             url = i['href']
             if url.startswith('/Mult'):
                 url = _URL_BASE + url
@@ -143,13 +137,7 @@ class Course:
         """
         url = _PREF_WORK + self._id
         soup = make_soup(url)
-        list = []
-        for i in soup.find_all('tr', class_='tr1'):
-            list.append(i)
-        for i in soup.find_all('tr', class_='tr2'):
-            list.append(i)
-        for i in list:
-            # TODO
+        for i in soup.find_all('tr', class_=['tr1', 'tr2']):
             tds = i.find_all('td')
             url = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/' + i.find('a')['href']
             id = re.search(r'(\d+)', url).group(0)
@@ -166,7 +154,13 @@ class Course:
         """
         url = _PREF_MSG + self.id
         soup = make_soup(url)
-        # TODO
+        for m in soup.find_all('tr', class_=['tr1', 'tr2']):
+            tds = m.find_all('td')
+            title = tds[1].contents[1].contents[0]
+            url = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/' + tds[1].contents[1]['href']
+            date = tds[3].contents[0]
+            yield Message(title=title, url=url, date=date)
+            # TODO
 
     @property
     def files(self):
@@ -176,12 +170,7 @@ class Course:
         """
         url = _PREF_FILES + self.id
         soup = make_soup(url)
-        list = []
-        for i in soup.find_all('tr', class_='tr1'):
-            list.append(i)
-        for i in soup.find_all('tr', class_='tr2'):
-            list.append(i)
-        for j in list:
+        for j in soup.find_all('tr', class_=['tr1', 'tr2']):
             name = re.search(r'getfilelink=([^&]+)&', str(j.find(text=lambda text: isinstance(text, Comment)))).group(1)
             a = j.find('a')
             url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
@@ -281,7 +270,7 @@ class File:
                 raise ValueError('failed in saving file', self.name, self.url)
             for block in r.iter_content(1024):
                 handle.write(block)
-        print('done',self.name)
+        print('done', self.name)
 
     @property
     def name(self):
@@ -305,7 +294,30 @@ class File:
 
 
 class Message:
-    pass
+    def __init__(self, url, title, date):
+        self._url = url
+        self._title = title
+        self._date = date
+        self._details = None
+
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def title(self):
+        return self._title
+
+    @property
+    def date(self):
+        return self._date
+
+    @property
+    def details(self):
+        if self._details is None:
+            soup = make_soup(self.url)
+            self._details = soup.find_all('td',class_='tr_l2')[1].text.replace('\xa0', ' ')
+        return self._details
 
 
 def main():
