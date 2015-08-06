@@ -51,6 +51,7 @@ def login(user_id=None, user_pass=None):
         return True
 
 
+
 def make_soup(url):
     """
     _session.GET the page, handle the encoding and return the BeautifulSoup

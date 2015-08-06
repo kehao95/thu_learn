@@ -48,3 +48,9 @@ for course in semester.courses:
     - name
     - note
     - url
+    - save
+- Message
+    - title
+    - url
+    - details
+    - date
