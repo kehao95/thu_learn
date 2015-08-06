@@ -263,15 +263,12 @@ class File:
         self._note = note
 
     def save(self, root='.'):
-        print(self.name)
-
         r = requests.get(self.url, stream=True)
         with open(root + '/' + self.name, 'wb') as handle:
             if not r.ok:
                 raise ValueError('failed in saving file', self.name, self.url)
             for block in r.iter_content(1024):
                 handle.write(block)
-        print('done', self.name)
 
     @property
     def name(self):
