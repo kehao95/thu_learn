@@ -2,26 +2,7 @@
 清华大学网络学堂爬虫
 
 ## 简单使用
-```
-- import thu_learn
-- 使用login函数（根据返回值可以判断是否登录成功True/False）
-- 初始实例化一个学期对象
-semester = Semester() //当前学期
-semester = Semester(current=False) //之前所有学期
-- 直接点号访问对象的子元素，相同当子元素数量大于一时返回为iterable
-for course in semester.courses:
-    course.name
-    course.url
-    course.id
-    for work in course.works:
-        work.title
-        work.url
-        ....
-    for file in course.files:
-        file.save(path)
-        ...
-```
-
+参考这里[快速入门](https://github.com/kehao95/THULearn/wiki/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
 
 欢迎编辑WIKI [https://github.com/kehao95/THULearn/wiki](https://github.com/kehao95/THULearn/wiki)
 欢迎fork+PR
