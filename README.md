@@ -1,5 +1,6 @@
 # THULearn
 清华大学网络学堂爬虫
+项目目标是建立一个可以直接进行二次开发的清华网络学堂API，功能基本覆盖清华网络学堂所有功能。
 
 ## 简单使用
 参考这里[快速入门](https://github.com/kehao95/THULearn/wiki/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8)
