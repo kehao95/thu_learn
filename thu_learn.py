@@ -15,6 +15,8 @@ _URL_LOGIN = _URL_BASE + '/MultiLanguage/lesson/teacher/loginteacher.jsp'
 # 学期
 _URL_CURRENT_SEMESTER = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?typepage=1'
 _URL_PAST_SEMESTER = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/MyCourse.jsp?typepage=2'
+# 个人信息
+_URL_PERSONAL_INFO = 'http://learn.tsinghua.edu.cn/MultiLanguage/vspace/vspace_userinfo1.jsp'
 
 # 课程不同板块前缀
 # 课程公告
@@ -179,6 +181,11 @@ class Course:
             yield File(name=name, url=url)
         pass
 
+    @property
+    def info(self):
+        url = _PREF_INFO + self.id
+        return Info(url)
+
 
 class Work:
     """
@@ -320,9 +327,39 @@ class Message:
         return self._details
 
 
+class Info:
+    class Teacher:
+        def __init__(self, name, email, phone, intro):
+            self.name = name
+            self.email = email
+            self.phone = phone
+            self.intro = intro
+
+    def __init__(self, url):
+        self.soup = make_soup(url)
+        tds = self.soup.find_all('td')
+        self._课程编号 = tds[4].text.replace(" ", "")
+        self._课程序号 = tds[6].text.replace(" ", "")
+        self._课程名称 = tds[8].text.replace(" ", "")
+        self._学分 = tds[10].text.replace(" ", "")
+        self._学时 = tds[12].text.replace(" ", "")
+        self._指定教材 = tds[27].text.replace(" ", "")
+        self._参考数目 = tds[29].text.replace(" ", "")
+        self._考核方式 = tds[31].text.replace(" ", "")
+        self._课程简介 = tds[33].text.replace(" ", "")
+        self._teacher = self.Teacher(
+            name=tds[19].text.replace("\xa0", ""),
+            email=tds[21].text.replace("\xa0", ""),
+            phone=tds[23].text[1:].split(";"),
+            intro=re.sub(r'[\r\t ]', '', tds[25].text),
+        )
+
+
+
 def main():
     import test
     test.main()
+
 
 
 if __name__ == '__main__':
