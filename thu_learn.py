@@ -356,7 +356,7 @@ class Info:
 
 
 def main():
-    import test
+    from tests import test
     test.main()
 
 
