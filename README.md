@@ -12,27 +12,4 @@
 ### 目前可用功能
 请参照Wiki[网络学堂基本元素结构](https://github.com/kehao95/THULearn/wiki/%E7%BD%91%E7%BB%9C%E5%AD%A6%E5%A0%82%E5%9F%BA%E6%9C%AC%E5%85%83%E7%B4%A0%E7%BB%93%E6%9E%84)
 
-- Semester
-    - courses
-- Course
-    - name
-    - id
-    - works
-    - files
-- Work
-    - id
-    - url
-    - title
-    - start_time
-    - end_time
-    - file
-- File
-    - name
-    - note
-    - url
-    - save
-- Message
-    - title
-    - url
-    - details
-    - date
+![](http://storage4.static.itmages.com/i/15/0811/h_1439285932_2280314_c093140f84.png)

@@ -355,11 +355,9 @@ class Info:
         )
 
 
-
 def main():
     import test
     test.main()
-
 
 
 if __name__ == '__main__':
