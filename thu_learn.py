@@ -176,10 +176,10 @@ class Course:
         soup = make_soup(url)
         for j in soup.find_all('tr', class_=['tr1', 'tr2']):
             name = re.search(r'getfilelink=([^&]+)&', str(j.find(text=lambda text: isinstance(text, Comment)))).group(1)
-            name = re.sub(r'_[^_]+\.','.',name)
             a = j.find('a')
             url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
             title = re.sub(r'[\n\r\t ]', '', a.contents[0])
+            name = re.sub(r'_[^_]+\.','.',name)
             yield File(name=name, url=url)
         pass
 
