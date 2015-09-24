@@ -101,6 +101,7 @@ class Semester:
                 continue
             name = i.contents[0]
             name = re.sub(r'[\n\r\t ]', '', name)
+            name = re.sub(r'\([^\(\)]+\)$','',name)
             id = url[-6:]
             yield Course(name=name, url=url, id=id)
 
@@ -175,6 +176,7 @@ class Course:
         soup = make_soup(url)
         for j in soup.find_all('tr', class_=['tr1', 'tr2']):
             name = re.search(r'getfilelink=([^&]+)&', str(j.find(text=lambda text: isinstance(text, Comment)))).group(1)
+            name = re.sub(r'_[^_]+\.','.',name)
             a = j.find('a')
             url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
             title = re.sub(r'[\n\r\t ]', '', a.contents[0])
@@ -357,7 +359,7 @@ class Info:
 
 def main():
     from tests import test
-    test.main()
+    test.test_all()
 
 
 if __name__ == '__main__':
