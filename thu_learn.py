@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup, Comment
 import re
 import os
+import getpass
 
 
 
@@ -40,7 +41,7 @@ def login(user_id=None, user_pass=None):
     """
     if user_id is None or user_pass is None:
         user_id = input("TsinghuaId:")
-        user_pass = input("Password:")
+        user_pass = getpass.getpass("Password:")
     data = dict(
         userid=user_id,
         userpass=user_pass,
@@ -101,6 +102,7 @@ class Semester:
                 continue
             name = i.contents[0]
             name = re.sub(r'[\n\r\t ]', '', name)
+            name = re.sub(r'\([^\(\)]+\)$','',name)
             id = url[-6:]
             yield Course(name=name, url=url, id=id)
 
@@ -146,7 +148,8 @@ class Course:
             title = i.find('a').contents[0]
             start_time = tds[1].contents[0]
             end_time = tds[2].contents[0]
-            yield Work(id=id, title=title, url=url, start_time=start_time, end_time=end_time)
+            submitted = ("已经提交" in tds[3].contents[0])
+            yield Work(id=id, title=title, url=url, start_time=start_time, end_time=end_time,submitted=submitted)
 
     @property
     def messages(self):
@@ -159,7 +162,6 @@ class Course:
         for m in soup.find_all('tr', class_=['tr1', 'tr2']):
             tds = m.find_all('td')
             title = tds[1].contents[1].text
-            print(title)
             url = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/' + tds[1].contents[1]['href']
             date = tds[3].text
             yield Message(title=title, url=url, date=date)
@@ -171,6 +173,14 @@ class Course:
         get all files in course
         :return: File generator
         """
+        def file_size_M(s):
+            digitals = s[:-1]
+            if s.endswith('K'):
+                return float(digitals)/1024
+            elif s.endswith('M'):
+                return float(digitals)
+            else :
+                return 1024 * float(digitals)
         url = _PREF_FILES + self.id
         soup = make_soup(url)
         for j in soup.find_all('tr', class_=['tr1', 'tr2']):
@@ -178,7 +188,9 @@ class Course:
             a = j.find('a')
             url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
             title = re.sub(r'[\n\r\t ]', '', a.contents[0])
-            yield File(name=name, url=url)
+            name = re.sub(r'_[^_]+\.','.',name)
+            size = file_size_M(j.find_all('td')[-3].text)
+            yield File(size =size, name=name, url=url)
         pass
 
     @property
@@ -192,7 +204,7 @@ class Work:
     the homework class
     """
 
-    def __init__(self, url=None, id=None, title=None, start_time=None, end_time=None):
+    def __init__(self, url=None, id=None, title=None, start_time=None, end_time=None,submitted=None):
         self._url = url
         self._id = id
         self._title = title
@@ -200,6 +212,7 @@ class Work:
         self._file = None
         self._start_time = start_time
         self._end_time = end_time
+        self._submitted = submitted
         self.soup = make_soup(self.url)
         pass
 
@@ -235,6 +248,14 @@ class Work:
         return self._end_time
 
     @property
+    def submitted(self):
+        """
+        end date of the work
+        :return: str time 'yyyy-mm-dd'
+        """
+        return self._submitted
+
+    @property
     def details(self):
         """
         the description of the work
@@ -264,14 +285,17 @@ class Work:
 
 
 class File:
-    def __init__(self, url, name, note=None):
+    def __init__(self, url, name, size, note=None):
         self._name = name
         self._url = url
         self._note = note
+        self._size = size
 
-    def save(self, root='.'):
+    def save(self, path='.'):
         r = requests.get(self.url, stream=True)
-        with open(root + '/' + self.name, 'wb') as handle:
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(path + '/' + self.name, 'wb') as handle:
             if not r.ok:
                 raise ValueError('failed in saving file', self.name, self.url)
             for block in r.iter_content(1024):
@@ -296,6 +320,10 @@ class File:
         # considering take course.details as note
         """
         return self._note
+
+    @property
+    def size(self):
+        return self._size
 
 
 class Message:
@@ -357,7 +385,7 @@ class Info:
 
 def main():
     from tests import test
-    test.main()
+    test.test_all()
 
 
 if __name__ == '__main__':
