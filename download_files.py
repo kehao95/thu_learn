@@ -8,6 +8,8 @@ _NEW_FILES_PATH  = _FILES_ROOT_PATH+'/'+ 'new_files'
 _UPDATE_FLAG = True
 _MAX_FILE_SIZE = 20
 
+
+
 def set_flag():
     if len(sys.argv) == 1:
         print("\n>> Will update files ---save new files to %s)"%_NEW_FILES_PATH)
@@ -46,5 +48,7 @@ def main():
 
 
 
+
 if __name__ == '__main__':
     main()
+
