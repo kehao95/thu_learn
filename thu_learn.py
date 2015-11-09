@@ -102,7 +102,7 @@ class Semester:
                 continue
             name = i.contents[0]
             name = re.sub(r'[\n\r\t ]', '', name)
-            name = re.sub(r'\([^\(\)]+\)$','',name)
+            name = re.sub(r'\([^\(\)]+\)$', '', name)
             id = url[-6:]
             yield Course(name=name, url=url, id=id)
 
@@ -149,7 +149,7 @@ class Course:
             start_time = tds[1].contents[0]
             end_time = tds[2].contents[0]
             submitted = ("已经提交" in tds[3].contents[0])
-            yield Work(id=id, title=title, url=url, start_time=start_time, end_time=end_time,submitted=submitted)
+            yield Work(id=id, title=title, url=url, start_time=start_time, end_time=end_time, submitted=submitted)
 
     @property
     def messages(self):
@@ -173,14 +173,16 @@ class Course:
         get all files in course
         :return: File generator
         """
+
         def file_size_M(s):
             digitals = s[:-1]
             if s.endswith('K'):
-                return float(digitals)/1024
+                return float(digitals) / 1024
             elif s.endswith('M'):
                 return float(digitals)
-            else :
+            else:
                 return 1024 * float(digitals)
+
         url = _PREF_FILES + self.id
         soup = make_soup(url)
         for j in soup.find_all('tr', class_=['tr1', 'tr2']):
@@ -188,9 +190,9 @@ class Course:
             a = j.find('a')
             url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
             title = re.sub(r'[\n\r\t ]', '', a.contents[0])
-            name = re.sub(r'_[^_]+\.','.',name)
+            name = re.sub(r'_[^_]+\.', '.', name)
             size = file_size_M(j.find_all('td')[-3].text)
-            yield File(size =size, name=name, url=url)
+            yield File(size=size, name=name, url=url)
         pass
 
     @property
@@ -204,7 +206,7 @@ class Work:
     the homework class
     """
 
-    def __init__(self, url=None, id=None, title=None, start_time=None, end_time=None,submitted=None):
+    def __init__(self, url=None, id=None, title=None, start_time=None, end_time=None, submitted=None):
         self._url = url
         self._id = id
         self._title = title
