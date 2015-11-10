@@ -5,6 +5,10 @@ from bs4 import BeautifulSoup, Comment
 import re
 import os
 import getpass
+import logging
+
+_DebugLevel = logging.DEBUG
+logging.basicConfig(level=logging.DEBUG)
 
 # global vars
 _session = requests.session()
@@ -47,8 +51,10 @@ def login(user_id=None, user_pass=None):
     r = _session.post(_URL_LOGIN, data)
     # 即使登录失败也是200所以根据返回内容简单区分了
     if len(r.content) > 120:
+        logging.debug("login failed")
         return False
     else:
+        logging.debug("login success")
         return True
 
 
@@ -118,6 +124,7 @@ class Course:
         self._works = list(self.works)
         self._files = list(self.files)
         self._messages = list(self.messages)
+        logging.debug(name)
 
     @property
     def url(self):
@@ -164,8 +171,9 @@ class Course:
             tds = m.find_all('td')
             title = tds[1].contents[1].text
             url = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/' + tds[1].contents[1]['href']
+            id = re.search(r"id=(\d+)", url).group(1)
             date = tds[3].text
-            yield Message(title=title, url=url, date=date)
+            yield Message(title=title, url=url, date=date, id=id)
             # TODO
 
     @property
@@ -216,6 +224,7 @@ class Work:
         self._start_time = start_time
         self._end_time = end_time
         self._submitted = submitted
+        logging.debug(title)
         pass
 
     @property
@@ -329,11 +338,17 @@ class File:
 
 
 class Message:
-    def __init__(self, url, title, date):
+    def __init__(self, url, title, date, id):
+        self._id = id
         self._url = url
         self._title = title
         self._date = date
         self._details = self.details
+        logging.debug(title)
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def url(self):
