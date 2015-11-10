@@ -81,8 +81,7 @@ class Semester:
             self.url = _URL_CURRENT_SEMESTER
         else:
             self.url = _URL_PAST_SEMESTER
-        self.soup = make_soup(self.url)
-        pass
+        self._courses = list(self.courses)
 
     @property
     def courses(self):
@@ -90,7 +89,8 @@ class Semester:
         return all the courses under the semester
         :return: Courses generator
         """
-        for j in self.soup.find_all('tr', class_=['info_tr', 'info_tr2']):
+        soup = make_soup(self.url)
+        for j in soup.find_all('tr', class_=['info_tr', 'info_tr2']):
             i = j.find('a')
             url = i['href']
             if url.startswith('/Mult'):
@@ -111,12 +111,13 @@ class Course:
     """
 
     def __init__(self, id, url=None, name=None):
+        pass
         self._id = id
         self._url = url
         self._name = name
-        self._works = self.works
-        self._files = self.files
-        self._messages = self.messages
+        self._works = list(self.works)
+        self._files = list(self.files)
+        self._messages = list(self.messages)
 
     @property
     def url(self):
@@ -263,7 +264,10 @@ class Work:
         :return:str details /None if not exists
         """
         soup = make_soup(self.url)
-        _details = soup.find_all('td', class_='tr_2')[1].textarea.contents[0]
+        try:
+            _details = soup.find_all('td', class_='tr_2')[1].textarea.contents[0]
+        except:
+            _details = ""
         return _details
 
     @property
