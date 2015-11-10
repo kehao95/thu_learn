@@ -6,8 +6,6 @@ import re
 import os
 import getpass
 
-
-
 # global vars
 _session = requests.session()
 _URL_BASE = 'https://learn.tsinghua.edu.cn'
@@ -210,12 +208,11 @@ class Work:
         self._url = url
         self._id = id
         self._title = title
-        self._details = None
-        self._file = None
+        self._details = self.details
+        self._file = self.file
         self._start_time = start_time
         self._end_time = end_time
         self._submitted = submitted
-        self.soup = make_soup(self.url)
         pass
 
     @property
@@ -263,12 +260,9 @@ class Work:
         the description of the work
         :return:str details /None if not exists
         """
-        if self._details is None:
-            try:
-                self._details = self.soup.find_all('td', class_='tr_2')[1].textarea.contents[0]
-            except:
-                pass
-        return self._details
+        soup = make_soup(self.url)
+        _details = soup.find_all('td', class_='tr_2')[1].textarea.contents[0]
+        return _details
 
     @property
     def file(self):
@@ -276,18 +270,18 @@ class Work:
         the file attached to the work
         :return: Instance of File/None if not exists
         """
-        if self._file is None:
-            try:
-                fname = self.soup.find_all('td', class_='tr_2')[2].a.contents[0]
-                furl = 'http://learn.tsinghua.edu.cn' + self.soup.find_all('td', class_='tr_2')[2].a['href']
-                self._file = File(url=furl, name=fname)
-            except:
-                pass
-        return self._file
+        soup = make_soup(self.url)
+        try:
+            fname = soup.find_all('td', class_='tr_2')[2].a.contents[0]
+            furl = 'http://learn.tsinghua.edu.cn' + soup.find_all('td', class_='tr_2')[2].a['href']
+            _file = File(url=furl, name=fname)
+        except(AttributeError):
+            _file = None
+        return _file
 
 
 class File:
-    def __init__(self, url, name, size, note=None):
+    def __init__(self, url, name, size=0, note=None):
         self._name = name
         self._url = url
         self._note = note
@@ -333,7 +327,7 @@ class Message:
         self._url = url
         self._title = title
         self._date = date
-        self._details = None
+        self._details = self.details
 
     @property
     def url(self):
@@ -349,12 +343,11 @@ class Message:
 
     @property
     def details(self):
-        if self._details is None:
-            soup = make_soup(self.url)
-            self._details = soup.find_all('td', class_='tr_l2')[1].text.replace('\xa0', ' ')
-            self._details = re.sub('(\\xa0)+', ' ', self._details)
-            self._details = re.sub('\n+', '\n', self._details)
-        return self._details
+        soup = make_soup(self.url)
+        _details = soup.find_all('td', class_='tr_l2')[1].text.replace('\xa0', ' ')
+        _details = re.sub('(\\xa0)+', ' ', _details)
+        _details = re.sub('\n+', '\n', _details)
+        return _details
 
 
 class Info:
@@ -385,9 +378,12 @@ class Info:
         )
 
 
+def test():
+    pass
+
+
 def main():
-    from tests import test
-    test.test_all()
+    test()
 
 
 if __name__ == '__main__':
