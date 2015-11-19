@@ -14,8 +14,9 @@ def main():
 
     Q.sort(key=lambda w: w[0].end_time)
     for w in Q:
+        courseName = w[1]
         work = w[0]
-        print(">>>>>%r\n%s %s \n\t%s" % (work.end_time, work.title, w[1], work.details))
+        print(">>%s<<\n%s %s \n%s" % (work.end_time, courseName, work.title, work.details))
 
 
 if __name__ == "__main__":
