@@ -6,8 +6,7 @@ from bs4 import BeautifulSoup, Comment
 import re
 import os
 import getpass
-
-
+import aiohttp
 
 # global vars
 _session = requests.session()
@@ -21,15 +20,10 @@ _URL_PAST_SEMESTER = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/
 _URL_PERSONAL_INFO = 'http://learn.tsinghua.edu.cn/MultiLanguage/vspace/vspace_userinfo1.jsp'
 
 # 课程不同板块前缀
-# 课程公告
 _PREF_MSG = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/getnoteid_student.jsp?course_id='
-# 课程信息
 _PREF_INFO = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/course_info.jsp?course_id='
-# 课程文件
 _PREF_FILES = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/download.jsp?course_id='
-# 教学资源
 _PREF_LIST = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/ware_list.jsp?course_id='
-# 课程作业
 _PREF_WORK = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id='
 
 
@@ -50,9 +44,7 @@ def login(user_id=None, user_pass=None):
     r = _session.post(_URL_LOGIN, data)
     # 即使登录失败也是200所以根据返回内容简单区分了
     if len(r.content) > 120:
-        return False
-    else:
-        return True
+        raise RuntimeError("Login %s failed, invalid password")
 
 
 def make_soup(url):
@@ -386,9 +378,31 @@ class Info:
         )
 
 
+def test():
+    import json, time
+    with open("secret.json", "r") as f:
+        secrets = json.loads(f.read())
+    login(user_id=secrets['username'], user_pass=secrets['password'])
+    semester = Semester()
+    start = time.time()
+    for course in list(semester.courses)[:3]:
+        print(course.name)
+        for message in course.messages:
+            print(message.title)
+    end = time.time()
+    print("using time %r" % (end - start))
+    # 单线程 9.176s
+
+def test_asynico():
+    import asyncio
+    loop = asyncio.get_event_loop()
+    asyncio.ensure_future(loop.run_in_executor(None, lambda: MyClass()))
+    asyncio.ensure_future(loop.run_in_executor(None, lambda: MyClass()))
+    
+
+
 def main():
-    from tests import test
-    test.test_all()
+    test()
 
 
 if __name__ == '__main__':
