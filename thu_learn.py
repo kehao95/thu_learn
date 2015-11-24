@@ -7,6 +7,7 @@ import re
 import os
 import getpass
 import aiohttp
+import time
 
 # global vars
 _session = requests.session()
@@ -26,6 +27,18 @@ _PREF_FILES = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/downloa
 _PREF_LIST = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/ware_list.jsp?course_id='
 _PREF_WORK = 'http://learn.tsinghua.edu.cn/MultiLanguage/lesson/student/hom_wk_brw.jsp?course_id='
 
+def timing(f):
+    """function timing wrapper"""
+
+    def wrapper(*arg, **kw):
+        t1 = time.time()
+        ret = f(*arg, **kw)
+        t2 = time.time()
+        print('func:%r args:[%r, %r] took: %2.4f sec' % \
+              (f.__name__, arg, kw, t2 - t1))
+        return ret
+
+    return wrapper
 
 def login(user_id=None, user_pass=None):
     """
@@ -378,27 +391,24 @@ class Info:
         )
 
 
+@timing
 def test():
-    import json, time
+    # func:'test' args:[(), {}] took: 65.0270 sec
+    import json
     with open("secret.json", "r") as f:
         secrets = json.loads(f.read())
     login(user_id=secrets['username'], user_pass=secrets['password'])
-    semester = Semester()
-    start = time.time()
-    for course in list(semester.courses)[:3]:
-        print(course.name)
+    semester = Semester(False)
+    for course in semester.courses:
         for message in course.messages:
-            print(message.title)
-    end = time.time()
-    print("using time %r" % (end - start))
-    # 单线程 9.176s
+            print(message.details)
+
 
 def test_asynico():
     import asyncio
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(loop.run_in_executor(None, lambda: MyClass()))
     asyncio.ensure_future(loop.run_in_executor(None, lambda: MyClass()))
-    
 
 
 def main():

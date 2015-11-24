@@ -63,7 +63,11 @@ def run(coroutine):
 
 async def make_soup(url):
     logger.debug("make_soup start %s" % url)
-    r = await _session.get(url)
+    try:
+        r = await _session.get(url)
+    except aiohttp.errors.ServerDisconnectedError:
+        print(url)
+        raise Exception("error in makesoup")
     soup = BeautifulSoup(await r.text(), "html.parser")
     logger.debug("make_soup done")
     return soup
@@ -96,7 +100,10 @@ def login(user_id=None, user_pass=None):
 
 class Semester:
     def __init__(self, current=True):
-        self.url = _URL_CURRENT_SEMESTER
+        if current is True:
+            self.url = _URL_CURRENT_SEMESTER
+        else:
+            self.url =_URL_PAST_SEMESTER
         self.soup = run(make_soup(self.url))
 
     @property
@@ -109,10 +116,9 @@ class Semester:
                 url = _URL_BASE + url
             else:  # !!important!! ignore the new WebLearning Courses At This moment
                 return None
-            soup = await make_soup(url)
             name = re.sub(r'\([^\(\)]+\)$', '', re.sub(r'[\n\r\t ]', '', i.contents[0]))
             id = url[-6:]
-            return Course(name=name, url=url, soup=soup, id=id)
+            return Course(name=name, url=url, id=id)
 
         async def get_courses(soup):
             # 异步地请求序列
@@ -124,11 +130,10 @@ class Semester:
 
 
 class Course:
-    def __init__(self, name, url, soup, id):
+    def __init__(self, name, url, id):
         self.id = id
         self.name = name
         self.url = url
-        self.soup = soup
 
     @property
     async def works(self):
@@ -160,7 +165,7 @@ class Course:
             title = tds[1].contents[1].text
             url = 'http://learn.tsinghua.edu.cn/MultiLanguage/public/bbs/' + tds[1].contents[1]['href']
             date = tds[3].text
-            return Message( title=title, url=url, date=date)
+            return Message(title=title, url=url, date=date)
 
         async def get_messages(soup):
             tasks = [get_message(i) for i in soup.find_all('tr', class_=['tr1', 'tr2'])]
@@ -178,14 +183,13 @@ class Course:
 
 
 class Work:
-    def __init__(self,id, title, url, start_time, end_time, submitted):
+    def __init__(self, id, title, url, start_time, end_time, submitted):
         self.id = id
         self.title = title
         self.url = url
         self.start_time = start_time
         self.end_time = end_time
         self.submitted = submitted
-
 
     @property
     async def details(self):
@@ -203,7 +207,6 @@ class Message:
         self.url = url
         self.date = date
 
-
     @property
     async def details(self):
         soup = await make_soup(self.url)
@@ -212,6 +215,7 @@ class Message:
         details = re.sub('\n+', '\n', details)
         return details
 
+
 @timing
 def main():
     import json
@@ -219,13 +223,9 @@ def main():
         secrets = json.loads(f.read())
     login(user_id=secrets['username'], user_pass=secrets['password'])
     # courses
-    semester = Semester()
-    async def foo():
-        for course in await semester.courses:
-            details = await  asyncio.gather(*[message.details for message in await course.messages])
-            for detail in details:
-                print(detail)
-    loop.run_until_complete(foo())
+    semester = Semester(False)
+
+
 
 
 
@@ -242,11 +242,15 @@ def test():
     login(user_id=secrets['username'], user_pass=secrets['password'])
     # courses
     semester = Semester()
-    for course in semester.courses:
-        print(course.name)
-        for work in course.works:
-            print(work.title)
+    async def foo():
+        courses = await semester.courses
+        messages = [item for sublist in await asyncio.gather(*[course.messages for course in courses])
+                    for item in sublist]
+        details = await  asyncio.gather(*[message.details for message in messages])
+        for detail in details:
+            print(detail[:5])
 
+    loop.run_until_complete(foo())
 
 if __name__ == '__main__':
     # test()

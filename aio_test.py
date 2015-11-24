@@ -16,11 +16,6 @@ urls = [
 urls = urls[:3]
 
 
-async def get_body(url):
-    print("request")
-    response = await aiohttp.get(url)
-    html = await response.read()
-    return html
 
 
 def timing(f):
@@ -37,6 +32,14 @@ def timing(f):
     return wrapper
 
 
+
+async def get_body(url):
+    print("Start request")
+    response = await aiohttp.get(url)
+    html = await response.read()
+    print("End request")
+    return html
+
 async def par():
     tasks = [get_body(url) for url in urls]
     for body in await asyncio.gather(*tasks):
@@ -45,7 +48,6 @@ async def par():
 
 @timing
 def run_asyncio():
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(par())
 
@@ -53,7 +55,9 @@ def run_asyncio():
 @timing
 def run_normal():
     for url in urls:
+        print("Start request")
         body = requests.get(url).content
+        print("End request")
         print(body[:16])
 
 
