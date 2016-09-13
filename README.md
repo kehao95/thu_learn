@@ -1,5 +1,6 @@
-# 暂停
-目前处于实习期间，工作还挺多，此项目暂时停止开发，有问题可以给我发issues 邮件还是会看的。
+# 新项目
+由于使用了的同步的IO此项目的效率远远不如aiolearn
+如果有兴趣可以先参考[kehao95/aiolearn](https://github.com/kehao95/aiolearn)
 
 # THULearn
 清华大学网络学堂爬虫
