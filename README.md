@@ -1,4 +1,5 @@
-# 新项目
+
+# Deprecated please refer to aiolearn
 由于使用了的同步的IO此项目的效率远远不如aiolearn
 如果有兴趣可以先参考[kehao95/aiolearn](https://github.com/kehao95/aiolearn)
 
