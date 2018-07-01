@@ -7,8 +7,8 @@ import os
 import getpass
 import logging
 
-_DebugLevel = logging.DEBUG
-logging.basicConfig(level=logging.DEBUG)
+_DebugLevel = logging.INFO
+logging.basicConfig(level=_DebugLevel)
 
 # global vars
 _session = requests.session()
@@ -51,10 +51,10 @@ def login(user_id=None, user_pass=None):
     r = _session.post(_URL_LOGIN, data)
     # 即使登录失败也是200所以根据返回内容简单区分了
     if len(r.content) > 120:
-        logging.debug("login failed")
+        logging.warning("login failed")
         return False
     else:
-        logging.debug("login success")
+        logging.info("login success")
         return True
 
 
@@ -124,7 +124,7 @@ class Course:
         self._works = list(self.works)
         self._files = list(self.files)
         self._messages = list(self.messages)
-        logging.debug(name)
+        logging.info(name)
 
     @property
     def url(self):
@@ -200,7 +200,7 @@ class Course:
             url = 'http://learn.tsinghua.edu.cn/kejian/data/%s/download/%s' % (self.id, name)
             title = re.sub(r'[\n\r\t ]', '', a.contents[0])
             name = re.sub(r'_[^_]+\.', '.', name)
-            size = file_size_M(j.find_all('td')[-3].text)
+            size = file_size_M(j.find_all('td')[-3].text) #单位：Mb
             yield File(size=size, name=name, url=url)
         pass
 
@@ -224,7 +224,7 @@ class Work:
         self._start_time = start_time
         self._end_time = end_time
         self._submitted = submitted
-        logging.debug(title)
+        logging.info(title)
         pass
 
     @property
@@ -294,6 +294,21 @@ class Work:
             _file = None
         return _file
 
+    @property
+    def answer(self):
+        """
+        the file attached to the work
+        :return: Instance of File/None if not exists
+        """
+        soup = make_soup(self.url)
+        try:
+            fname = soup.find_all('td', class_='tr_2')[4].a.contents[0]
+            furl = 'http://learn.tsinghua.edu.cn' + soup.find_all('td', class_='tr_2')[4].a['href']
+            _file = File(url=furl, name=fname)
+        except(AttributeError):
+            _file = None
+        return _file
+
 
 class File:
     def __init__(self, url, name, size=0, note=None):
@@ -344,7 +359,7 @@ class Message:
         self._title = title
         self._date = date
         self._details = self.details
-        logging.debug(title)
+        logging.info(title)
 
     @property
     def id(self):
@@ -382,15 +397,15 @@ class Info:
     def __init__(self, url):
         self.soup = make_soup(url)
         tds = self.soup.find_all('td')
-        self._课程编号 = tds[4].text.replace(" ", "")
-        self._课程序号 = tds[6].text.replace(" ", "")
-        self._课程名称 = tds[8].text.replace(" ", "")
-        self._学分 = tds[10].text.replace(" ", "")
-        self._学时 = tds[12].text.replace(" ", "")
-        self._指定教材 = tds[27].text.replace(" ", "")
-        self._参考数目 = tds[29].text.replace(" ", "")
-        self._考核方式 = tds[31].text.replace(" ", "")
-        self._课程简介 = tds[33].text.replace(" ", "")
+        self._classId = tds[4].text.replace(" ", "") #课程编号
+        self._classSeq = tds[6].text.replace(" ", "")#课程序号
+        self._className = tds[8].text.replace(" ", "")#课程名称
+        self._credit = tds[10].text.replace(" ", "")#学分
+        self._learnHour = tds[12].text.replace(" ", "")#学时
+        self._material = tds[27].text.replace(" ", "")#指定教材
+        self._reference = tds[29].text.replace(" ", "")#参考书目
+        self._testMethod = tds[31].text.replace(" ", "")#考核方式
+        self._classIntro = tds[33].text.replace(" ", "")#课程简介
         self._teacher = self.Teacher(
             name=tds[19].text.replace("\xa0", ""),
             email=tds[21].text.replace("\xa0", ""),
